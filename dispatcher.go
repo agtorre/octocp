@@ -1,16 +1,16 @@
 package main
 
-import "fmt"
+import "log"
 
-var WorkerQueue chan chan WorkRequest
+var WorkerQueue chan chan workRequest
 
 func StartDispatcher(nworkers int) {
 	// First, initialize the channel we are going to but the workers' work channels into.
-	WorkerQueue = make(chan chan WorkRequest, nworkers)
+	WorkerQueue = make(chan chan workRequest, nworkers)
 
 	// Now, create all of our workers.
 	for i := 0; i < nworkers; i++ {
-		fmt.Println("Starting worker", i+1)
+		log.Println("Starting worker", i+1)
 		worker := NewWorker(i+1, WorkerQueue)
 		worker.Start()
 	}
@@ -18,12 +18,12 @@ func StartDispatcher(nworkers int) {
 	go func() {
 		for {
 			select {
-			case work := <-WorkQueue:
-				fmt.Println("Received work request")
+			case work := <-workQueue:
+				log.Printf("Received work request: %s\n", work)
 				go func() {
 					worker := <-WorkerQueue
 
-					fmt.Println("Dispatching work request")
+					log.Println("Dispatching work request")
 					worker <- work
 				}()
 			}

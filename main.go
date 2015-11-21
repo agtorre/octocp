@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"path/filepath"
 	"time"
 )
 
@@ -30,30 +32,34 @@ func init() {
 }
 
 //Begin magic
-
-type WorkKind string
+type WorkType string
 
 const (
-	workStat WorkKind = "stat"
+	workStat    WorkType = "stat"
+	workReaddir          = "readdir"
 )
 
-type WorkRequest struct {
-	Kind    WorkKind
+type workRequest struct {
+	Type    WorkType
 	InPath  string
 	OutPath string
 }
 
-var WorkQueue = make(chan WorkRequest, 100)
+var workQueue = make(chan workRequest, 100)
 
 func processInput(args []string) {
 	fmt.Println("processing input")
 
 	for _, path := range args {
-		work := WorkRequest{
-			Kind:   workStat,
-			InPath: path,
+		pAbs, err := filepath.Abs(path)
+		if err != nil {
+			log.Panicf("error encountered: %\n", err)
 		}
-		WorkQueue <- work
+		work := workRequest{
+			Type:   workStat,
+			InPath: pAbs,
+		}
+		workQueue <- work
 	}
 
 }
@@ -61,7 +67,7 @@ func processInput(args []string) {
 func main() {
 	flag.Parse()
 
-	StartDispatcher(20)
+	StartDispatcher(5)
 	processInput(flag.Args())
 
 	for {
