@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"time"
+	"sync"
 )
 
 var Options struct {
@@ -67,11 +67,9 @@ func processInput(args []string) {
 func main() {
 	flag.Parse()
 
-	StartDispatcher(5)
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	StartDispatcher(5, wg)
 	processInput(flag.Args())
-
-	for {
-		time.Sleep(time.Second * 1)
-	}
-
+	wg.Wait()
 }
