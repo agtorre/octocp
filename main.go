@@ -8,6 +8,7 @@ import (
 	"sync"
 )
 
+// Options struct to whole all command line arguments
 var Options struct {
 	verbose   bool
 	recursive bool
@@ -31,7 +32,7 @@ func init() {
 	config()
 }
 
-//Begin magic
+// WorkType is used for switching on various types of works
 type WorkType string
 
 const (
@@ -53,7 +54,7 @@ func processInput(args []string) {
 	for _, path := range args {
 		pAbs, err := filepath.Abs(path)
 		if err != nil {
-			log.Panicf("error encountered: %\n", err)
+			log.Panicf("error encountered: %s\n", err)
 		}
 		work := workRequest{
 			Type:   workStat,
